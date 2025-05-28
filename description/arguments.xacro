@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+	<!-- Arguments -->
+    <xacro:arg name="left_camera_rpy" default="1.5707 0.0698 -0.5277"/>
+    <xacro:arg name="left_camera_xyz" default="0.3369 0.0679 0.0585"/>
+
+    <xacro:arg name="right_camera_rpy" default="1.5707 0.0698 0.5277"/>
+    <xacro:arg name="right_camera_xyz" default="0.3334 -0.047 0.0585"/>
+</robot>

@@ -1,0 +1,244 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+<!--
+   Includes
+-->
+<xacro:include filename="primitives.xacro" />
+<xacro:include filename="constants.xacro" />
+<xacro:include filename="intel_d435.urdf.xacro" />
+
+<!--
+    Depth camera
+-->
+<xacro:macro name="depth_camera_gazebo_controller" params="name namespace:='' resolution_width:=1280 resolution_height:=720 horizontal_fov:=85 near_plane:=0.1 far_plane:=5.0 frame:=''
+    update_rate:=60.0 ">
+    <gazebo reference="${frame}">
+    <sensor name="${name}_depth" type="depth">
+
+      <always_on>true</always_on>
+
+      <!-- Set update_rate only sensor, not on plugin -->
+      <update_rate>${update_rate}</update_rate>
+
+      <camera name="${name}">
+        <visualize>true</visualize>
+        <pose>0 0 0 0 -1.57 1.57</pose>
+        <horizontal_fov>${DEG_TO_RAD * horizontal_fov}</horizontal_fov>
+        <image>
+          <width>${resolution_width}</width>
+          <height>${resolution_height}</height>
+          <format>B8G8R8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>5.0</far>
+        </clip>
+        <distortion>
+          <k1>0.00001</k1>
+          <k2>0.00001</k2>
+          <k3>0.00001</k3>
+          <p1>0.00001</p1>
+          <p2>0.00001</p2>
+          <center>0.5 0.5</center>
+        </distortion>
+      </camera>
+
+      <plugin name="${name}_plugin" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>${namespace}</namespace>
+          <argument>${name}/image_raw:=${name}/color/image_raw</argument>
+          <argument>${name}/camera_info:=${name}/color/camera_info</argument>
+          <argument>${name}/image_depth:=${name}/depth/image_raw</argument>
+          <argument>${name}/camera_info_depth:=${name}/depth/camera_info</argument>
+          <argument>${name}/points:=${name}/depth/color/points</argument>
+          <qos>
+            <topic name="${name}/depth/color/points">
+                <publisher>
+                    <reliability>best_effort</reliability>
+                </publisher>
+            </topic>
+            <topic name="${name}/color/image_raw">
+                <publisher>
+                    <reliability>best_effort</reliability>
+                </publisher>
+            </topic>
+            <topic name="${name}/depth/image_raw">
+                <publisher>
+                    <reliability>best_effort</reliability>
+                </publisher>
+            </topic>
+          </qos>
+        </ros>
+
+        <!-- Set camera name. If empty, defaults to sensor name (i.e. "sensor_name") -->
+        <camera_name>${name}</camera_name>
+
+        <!-- Set TF frame name. If empty, defaults to link name (i.e. "link_name") -->
+        <frame_name>${frame}</frame_name>
+
+        <focal_length>0</focal_length>
+        <hack_baseline>0.0</hack_baseline>
+
+        <!-- No need to repeat distortion parameters or to set autoDistortion -->
+
+        <min_depth>${near_plane}</min_depth>
+        <max_depth>${far_plane}</max_depth>
+      </plugin>
+    </sensor>
+  </gazebo>
+</xacro:macro>
+
+<xacro:macro name="intel_d435" params="name parent_link *origin namespace:='' visible:=True material:=black optical_link:=True use_nominal_extrinsics:=True
+  resolution_width:=1280 resolution_height:=720 ">
+
+    <xacro:sensor_d435 parent="${parent_link}" name="${name}" use_nominal_extrinsics="${use_nominal_extrinsics}">
+        <xacro:insert_block name="origin"/>
+    </xacro:sensor_d435>
+    <xacro:depth_camera_gazebo_controller
+        name="${name}"
+        namespace="${namespace}"
+        resolution_width="1280"
+        resolution_height ="720"
+        horizontal_fov ="87"
+        near_plane ="0.1"
+        far_plane ="5.0"
+        frame = "${name}_depth_optical_frame">
+    </xacro:depth_camera_gazebo_controller>
+</xacro:macro>
+
+<!--
+    IMU
+-->
+<xacro:macro name="imu" params="name parent_link *joint_pose visible:=True length:=0.05 width:=0.05 height:=0.02 mass:=0.05 material:=black namespace:='' data_topic:='raw_data'">
+
+    <xacro:fixed_box name="${name}" length="${length}" width="${width}"  height="${height}" parent_link="${parent_link}" mass="${mass}" material="${material}" visible="${visible}">
+        <xacro:insert_block name="joint_pose"/>
+    </xacro:fixed_box>
+
+    <xacro:if value="${not namespace}">
+        <xacro:property name="namespace" value="${name}" />
+    </xacro:if>
+
+    <gazebo>
+        <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
+            <alwaysOn>true</alwaysOn>
+
+            <frameId>${name}_link</frameId>
+            <frameName>${name}_link</frameName>
+
+            <topicName>/${namespace}/${data_topic}</topicName>
+            <serviceName>/${namespace}/service</serviceName>
+
+            <updateRate>50.0</updateRate>
+
+            <!-- time constant 1h -->
+            <xacro:property name="drift_frequency" value="${1.0/3600.0}" />
+            <xacro:property name="scale_error" value="1.0" />
+
+            <accelOffset>0.005 0.005 0.005</accelOffset>
+            <accelDrift>0.005 0.005 0.005</accelDrift>
+            <accelDriftFrequency>${drift_frequency} ${drift_frequency} ${drift_frequency}</accelDriftFrequency>
+            <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
+            <accelScaleError>${scale_error} ${scale_error} ${scale_error}</accelScaleError>
+
+            <rateOffset>0.005 0.005 0.005</rateOffset>
+            <rateDrift>0.005 0.005 0.005</rateDrift>
+            <rateDriftFrequency>${drift_frequency} ${drift_frequency} ${drift_frequency}</rateDriftFrequency>
+            <rateGaussianNoise>0.005 0.005 0.005</rateGaussianNoise>
+            <rateScaleError>${scale_error} ${scale_error} ${scale_error}</rateScaleError>
+
+            <yawOffset>0.005</yawOffset>
+            <yawDrift>0.005</yawDrift>
+            <yawDriftFrequency>${drift_frequency}</yawDriftFrequency>
+            <yawGaussianNoise>0.005</yawGaussianNoise>
+            <yawScaleError>${scale_error}</yawScaleError>
+        </plugin>
+    </gazebo>
+</xacro:macro>
+
+<!--
+    Lidar
+-->
+<xacro:macro name="lidar" params="name parent_link *joint_pose min_angle:=-1.570796 max_angle:=1.570796 min_range:=0.10 max_range=25.0 ang_resolution:=0.25 visible:=True ray_visible:=true radius:=0.06 height:=0.15 mass:=0.2 material:=black use_gpu:=false namespace:='' mesh:='' update_rate:=35 noise:=0.001">
+
+
+    <xacro:if value="${not mesh}">
+        <xacro:fixed_cylinder name="${name}" radius="${radius}" height="${height}" parent_link="${parent_link}" mass="${mass}" material="${material}" visible="${visible}">
+            <xacro:insert_block name="joint_pose"/>
+        </xacro:fixed_cylinder>
+    </xacro:if>
+    <xacro:if value="${mesh != ''}">
+        <xacro:fixed_mesh name="${name}" mesh="${mesh}" parent_link="${parent_link}" material="${material}" visible="${visible}">
+            <xacro:insert_block name="joint_pose"/>
+        </xacro:fixed_mesh>
+    </xacro:if>
+
+
+    <xacro:if value="${not namespace}">
+        <xacro:property name="namespace" value="${name}" />
+    </xacro:if>
+
+    <xacro:property name="gpu" value="" />
+    <xacro:if value="${use_gpu}">
+        <xacro:property name="gpu" value="gpu_" />
+    </xacro:if>
+
+    <xacro:property name="shortest_ang_diff_step1" value="${fmod(fmod(max_angle-min_angle, 2.0*pi) + 2.0*pi, 2.0*pi)}" />
+    <xacro:property name="shortest_ang_diff" value="${shortest_ang_diff_step1-2.0*pi if shortest_ang_diff_step1>pi else shortest_ang_diff_step1}" />
+    <xacro:property name="ang_diff" value="${shortest_ang_diff if copysign(1, max_angle) == copysign(1, min_angle) else 2.0*pi-shortest_ang_diff}" />
+    <xacro:property name="num_points" value="${degrees(ang_diff)/ang_resolution}" />
+
+    <gazebo reference="${name}_link">
+      <sensor type="${gpu}ray" name="${name}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>${ray_visible}</visualize>
+        <update_rate>${update_rate}</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+                <samples>${num_points}</samples>
+                <resolution>1</resolution>
+                <min_angle>${min_angle}</min_angle>
+                <max_angle>${max_angle}</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+              <min>${min_range}</min>
+              <max>${max_range}</max>
+              <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>${noise}</stddev>
+          </noise>
+        </ray>
+        <plugin name="lidar_controller" filename="libgazebo_ros_${gpu}laser.so">
+          <topicName>${namespace}/scan</topicName>
+          <frameName>${name}_link</frameName>
+        </plugin>
+      </sensor>
+    </gazebo>
+</xacro:macro>
+
+<xacro:macro name="microscan_pro" params="name parent_link *joint_pose visible:=True ray_visible:=true material:=black use_gpu:=false namespace:='' min_angle:=${-137.5*DEG_TO_RAD} max_angle:=${137.5*DEG_TO_RAD}">
+    <xacro:lidar
+        name="${name}"
+        parent_link="${parent_link}"
+        material="${material}"
+        visible="${visible}"
+        use_gpu="${use_gpu}"
+        namespace="${namespace}"
+        ray_visible="${ray_visible}"
+        min_angle="${min_angle}"
+        max_angle="${max_angle}"
+        min_range="0.10"
+        max_range="40.0"
+        ang_resolution="0.39">
+        <xacro:insert_block name="joint_pose"/>
+    </xacro:lidar>
+</xacro:macro>
+
+</robot>

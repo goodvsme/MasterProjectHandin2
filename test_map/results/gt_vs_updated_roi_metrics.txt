@@ -1,0 +1,11 @@
+=== ROI FOCUSED METRICS ===
+
+IoU within ROI: 0.9905
+Recall within ROI (% of GT preserved): 99.52%
+False Negatives within ROI: 432 pixels
+False Positives within ROI: 421 pixels
+True Positives within ROI: 89011 pixels
+True Positives (Correctly Added) within ROI: 528 pixels
+
+Relevant ROI boundaries [top, left, bottom, right]: [1051, 0, 1551, 427]
+Relevant ROI dimensions: 500 x 427

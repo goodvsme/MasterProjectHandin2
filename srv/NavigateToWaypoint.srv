@@ -1,0 +1,7 @@
+# Request: Navigate to a specific waypoint
+string start_waypoint_id  # Optional, if empty the planner will determine the closest waypoint
+string waypoint_id        # Target waypoint ID to navigate to
+---
+# Response
+bool success              # Whether navigation was successful
+string message            # Additional information or error message

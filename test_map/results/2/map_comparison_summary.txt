@@ -1,0 +1,9 @@
+=== MAP COMPARISON SUMMARY (COMPARED TO GROUND TRUTH) ===
+
+Map Name, Global IoU, Global IoU (%), Global Recall (%), ROI IoU, ROI IoU (%), ROI Recall (%)
+map_0, 0.9959, 99.59%, 99.59%, 0.9881, 98.81%, 98.81%
+map_cleaned_map_1, 0.9933, 99.33%, 99.67%, 0.9840, 98.40%, 99.21%
+map_cleaned_map_2, 0.9916, 99.16%, 99.67%, 0.9837, 98.37%, 99.37%
+map_cleaned_map_3, 0.9912, 99.12%, 99.73%, 0.9830, 98.30%, 99.48%
+map_cleaned_map_4, 0.9909, 99.09%, 99.76%, 0.9829, 98.29%, 99.55%
+map_cleaned_map_5, 0.9910, 99.10%, 99.83%, 0.9826, 98.26%, 99.67%

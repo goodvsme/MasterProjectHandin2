@@ -1,0 +1,262 @@
+<?xml version="1.0"?>
+
+<!--
+From convention REP-103:
+"In relation to a body the standard is:
+
+x forward
+y left
+z up"
+
+Thus, we understand:
+x: length
+y: width
+z: height
+ -->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!--
+        Default parameters
+    -->
+    <xacro:property name="minimum_inertia" value="0.01" />
+
+    <!-- Box Macro!
+    <xacro:box name="" width="" length="" height="" mass=""/>
+     -->
+    <xacro:macro name="box_primitive" params="name length width height mass material:=white visible:=True">
+
+        <!-- Set the minimum intertia -->
+        <xacro:property name="ixx" value="${minimum_inertia}" />
+        <xacro:if value="${mass / 12.0 * (width*width + height*height) > minimum_inertia}">
+            <xacro:property name="ixx" value="${mass / 12.0 * (width*width + height*height)}" />
+        </xacro:if>
+
+        <xacro:property name="iyy" value="${minimum_inertia}" />
+        <xacro:if value="${mass / 12.0 * (length*length + height*height) > minimum_inertia}">
+            <xacro:property name="iyy" value="${mass / 12.0 * (length*length + height*height)}" />
+        </xacro:if>
+
+        <xacro:property name="izz" value="${minimum_inertia}" />
+        <xacro:if value="${mass / 12.0 * (length*length + width*width) > minimum_inertia}">
+            <xacro:property name="izz" value="${mass / 12.0 * (length*length + width*width)}" />
+        </xacro:if>
+
+        <!-- Creates the link -->
+        <link name="${name}">
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${length} ${width} ${height}"/>
+                </geometry>
+            </collision>
+
+            <xacro:if value="${visible == True}">
+                <visual>
+                    <origin xyz="0 0 0" rpy="0 0 0"/>
+                    <geometry>
+                        <box size="${length} ${width} ${height}" />
+                    </geometry>
+                    <material name="${material}"/>
+                </visual>
+            </xacro:if>
+
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${ixx}" ixy="0.0" ixz="0.0"
+                    iyy="${iyy}" iyz="0.0"
+                    izz="${izz}"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+
+    <!-- Spehere Macro!
+    <xacro:sphere name="" radius="" mass=""/>
+     -->
+    <xacro:macro name="sphere_primitive" params="name radius mass material:=white visible:=True">
+
+        <!-- Set the minimum intertia -->
+        <xacro:property name="ixx" value="${minimum_inertia}" />
+        <xacro:property name="iyy" value="${minimum_inertia}" />
+        <xacro:property name="izz" value="${minimum_inertia}" />
+        <xacro:if value="${(2*mass*radius*radius)/5 > minimum_inertia}">
+            <xacro:property name="ixx" value="${2*mass*radius*radius/5}" />
+            <xacro:property name="iyy" value="${2*mass*radius*radius/5}" />
+            <xacro:property name="izz" value="${2*mass*radius*radius/5}" />
+        </xacro:if>
+
+        <!-- Creates the link -->
+        <link name="${name}">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${ixx}" ixy="0.0" ixz="0.0"
+                    iyy="${iyy}" iyz="0.0"
+                    izz="${izz}"/>
+            </inertial>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <sphere radius="${radius}"/>
+                </geometry>
+            </collision>
+            <xacro:if value="${visible == True}">
+                <visual name="visual">
+                    <origin rpy="0 0 0" xyz="0 0 0"/>
+                    <geometry>
+                        <sphere radius="${radius}"/>
+                    </geometry>
+                    <material name="${material}"/>
+                </visual>
+            </xacro:if>
+        </link>
+    </xacro:macro>
+
+
+    <!-- Cylinder Macro!
+    <xacro:cylinder name="" radius="" height="" mass=""/>
+     -->
+    <xacro:macro name="cylinder_primitive" params="name radius height mass material:=white visible:=True collision_height:=''">
+
+        <xacro:if value="${not collision_height}">
+            <xacro:property name="collision_height" value="${height}" />
+        </xacro:if>
+
+        <!-- Set the minimum intertia -->
+        <xacro:property name="ixx" value="${minimum_inertia}" />
+        <xacro:if value="${(mass/12*(3*radius*radius+height*height)) > minimum_inertia}">
+            <xacro:property name="ixx" value="${(mass/12*(3*radius*radius+height*height))}" />
+        </xacro:if>
+
+        <xacro:property name="iyy" value="${minimum_inertia}" />
+        <xacro:if value="${(mass/12*(3*radius*radius+height*height)) > minimum_inertia}">
+            <xacro:property name="iyy" value="${(mass/12*(3*radius*radius+height*height))}" />
+        </xacro:if>
+
+        <xacro:property name="izz" value="${minimum_inertia}" />
+        <xacro:if value="${mass*(radius*radius)/2 > minimum_inertia}">
+            <xacro:property name="izz" value="${mass*(radius*radius)/2}" />
+        </xacro:if>
+
+        <!-- Creates the link -->
+        <link name="${name}">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${ixx}" ixy="0.0" ixz="0.0"
+                    iyy="${iyy}" iyz="0.0"
+                    izz="${izz}"/>
+            </inertial>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <cylinder length="${collision_height}" radius="${radius}"/>
+                </geometry>
+            </collision>
+            <xacro:if value="${visible == True}">
+                <visual>
+                    <origin rpy="0 0 0" xyz="0 0 0"/>
+                    <geometry>
+                        <cylinder length="${height}" radius="${radius}"/>
+                    </geometry>
+                    <material name="${material}"/>
+                </visual>
+            </xacro:if>
+        </link>
+    </xacro:macro>
+
+    <!--
+        Mesh Macro
+    -->
+    <xacro:macro name="mesh_primitive" params="name mesh material:=white visible:=True">
+
+        <!-- Set the minimum intertia -->
+        <xacro:property name="ixx" value="${minimum_inertia}" />
+        <xacro:property name="iyy" value="${minimum_inertia}" />
+        <xacro:property name="izz" value="${minimum_inertia}" />
+
+        <!-- Creates the link -->
+        <link name="${name}">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${ixx}" ixy="0.0" ixz="0.0"
+                    iyy="${iyy}" iyz="0.0"
+                    izz="${izz}"/>
+            </inertial>
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <mesh filename="${mesh}"/>
+                </geometry>
+            </collision>
+            <xacro:if value="${visible == True}">
+                <visual>
+                    <origin rpy="0 0 0" xyz="0 0 0"/>
+                    <geometry>
+                        <mesh filename="${mesh}"/>
+                    </geometry>
+                    <material name="${material}"/>
+                </visual>
+            </xacro:if>
+        </link>
+    </xacro:macro>
+
+    <!--
+        Fixed box
+    -->
+    <xacro:macro name="fixed_box" params="name length width height mass parent_link *joint_pose material:=white visible:=True">
+        <xacro:box_primitive name="${name}_link" length="${length}" width="${width}" height="${height}" mass="${mass}" visible="${visible}"  material="${material}"/>
+
+        <joint name="${name}_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="${name}_link"/>
+            <xacro:insert_block name="joint_pose"/>
+        </joint>
+    </xacro:macro>
+
+    <!--
+        Fixed cylinder
+    -->
+    <xacro:macro name="fixed_cylinder" params="name radius height mass parent_link *joint_pose material:=white visible:=True">
+        <xacro:cylinder_primitive name="${name}_link" radius="${radius}" height="${height}" mass="${mass}" visible="${visible}" material="${material}"/>
+
+        <joint name="${name}_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="${name}_link"/>
+            <xacro:insert_block name="joint_pose"/>
+        </joint>
+    </xacro:macro>
+
+    <!--
+        Fixed sphere
+    -->
+    <xacro:macro name="fixed_sphere" params="name radius mass parent_link *joint_pose material:=white visible:=True">
+        <xacro:sphere_primitive name="${name}_link" radius="${radius}" mass="${mass}" visible="${visible}" material="${material}"/>
+
+        <joint name="${name}_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="${name}_link"/>
+            <xacro:insert_block name="joint_pose"/>
+        </joint>
+    </xacro:macro>
+
+    <!--
+        Fixed geometry
+    -->
+    <xacro:macro name="fixed_mesh" params="name mesh parent_link *joint_pose material:=white visible:=True">
+        <xacro:mesh_primitive name="${name}_link" mesh="${mesh}" visible="${visible}" material="${material}"/>
+
+        <joint name="${name}_joint" type="fixed">
+            <parent link="${parent_link}"/>
+            <child link="${name}_link"/>
+            <xacro:insert_block name="joint_pose"/>
+        </joint>
+    </xacro:macro>
+</robot>

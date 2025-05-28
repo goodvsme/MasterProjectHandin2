@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="human_cylinder">
+    <static>1</static>  <!-- Set to 1 to keep the cylinder stationary -->
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.3</radius>  <!-- Adjust size -->
+            <length>1.8</length>   <!-- Height of human -->
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8 0.1 0.1 1</ambient>  <!-- Red color -->
+          <diffuse>0.8 0.1 0.1 1</diffuse>
+          <specular>0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.3</radius>
+            <length>1.8</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

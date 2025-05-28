@@ -1,0 +1,6 @@
+int32 node_id
+float32 cost
+float32[] costs  # For bulk updates
+---
+bool success
+string message

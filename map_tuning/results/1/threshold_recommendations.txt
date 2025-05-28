@@ -1,0 +1,23 @@
+=== THRESHOLD RECOMMENDATIONS ===
+
+Based on the analysis of confidence values in misclassified cells, the following thresholds are recommended:
+
+reduce_false_positives: 14
+reduce_false_negatives: 1
+balanced: 7
+verification_threshold: 3
+
+Recommendation summary:
+For a balanced approach, we recommend:
+- confidence_threshold: 7
+- verification_threshold: 3
+
+These recommendations aim to balance the tradeoff between reducing false positives and false negatives.
+Adjust these values based on whether you prioritize map completeness (lower threshold) or accuracy (higher threshold).
+
+
+=== GRID SEARCH RECOMMENDATION ===
+
+Based on exhaustive grid search, the optimal thresholds are:
+- confidence_threshold: 1
+- verification_threshold: 3

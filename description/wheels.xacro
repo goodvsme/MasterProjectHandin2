@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!--
+       Includes
+    -->
+    <xacro:include filename="primitives.xacro" />
+
+    <!--
+        Prototype wheel
+    -->
+    <xacro:macro
+        name="simple_wheel"
+        params="
+            wheel_prefix
+            mass
+            parent_link
+            *origin
+            **gazebo_options
+            radius:=0.1
+            height:=0.04
+            material:=white
+            collision_height:=0.001
+            joint_type:=continuous
+            mesh=''
+        "
+    >
+        <!-- Set the minimum intertia -->
+        <xacro:property name="ixx" value="${minimum_inertia}" />
+        <xacro:if value="${(mass/12*(3*radius*radius+height*height)) > minimum_inertia}">
+            <xacro:property name="ixx" value="${(mass/12*(3*radius*radius+height*height))}" />
+        </xacro:if>
+
+        <xacro:property name="iyy" value="${minimum_inertia}" />
+        <xacro:if value="${(mass/12*(3*radius*radius+height*height)) > minimum_inertia}">
+            <xacro:property name="iyy" value="${(mass/12*(3*radius*radius+height*height))}" />
+        </xacro:if>
+
+        <xacro:property name="izz" value="${minimum_inertia}" />
+        <xacro:if value="${mass*(radius*radius)/2 > minimum_inertia}">
+            <xacro:property name="izz" value="${mass*(radius*radius)/2}" />
+        </xacro:if>
+
+        <xacro:if value="${not mesh}">
+            <xacro:cylinder_primitive name="${wheel_prefix}_wheel_link" radius="${radius}" height="${height}" mass="${mass}" material="${material}" collision_height="${collision_height}"/>
+        </xacro:if>
+
+        <xacro:if value="${mesh != ''}">
+            <link name="${wheel_prefix}_wheel_link">
+                <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <mass value="${mass}" />
+                <inertia ixx="${ixx}" ixy="0" ixz="0" iyy="${iyy}" iyz="0" izz="${izz}" />
+                </inertial>
+
+                <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${height}" radius="${radius}"/>
+                </geometry>
+                <material name="${material}"/>
+                </visual>
+
+                <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${height}" radius="${radius}"/>
+                </geometry>
+                </collision>
+            </link>
+        </xacro:if>
+
+        <joint name="${wheel_prefix}_wheel_joint" type="${joint_type}">
+            <parent link="${parent_link}"/>
+            <child link="${wheel_prefix}_wheel_link"/>
+            <xacro:insert_block name="origin"/>
+            <axis xyz="0 0 1"/>
+        </joint>
+
+        <gazebo reference="${wheel_prefix}_wheel_link">
+            <xacro:insert_block name="gazebo_options"/>
+        </gazebo>
+    </xacro:macro>
+
+
+    <!--
+        Actuated wheel
+    -->
+    <xacro:macro
+        name="actuated_wheel"
+        params="
+            wheel_prefix
+            mass
+            parent_link
+            *origin
+            radius:=0.1
+            height:=0.04
+            reduction:=1
+            material:=white
+            collision_height:=0.001
+            mesh=''
+        "
+    >
+        <xacro:simple_wheel
+            wheel_prefix="${wheel_prefix}"
+            mass="${mass}"
+            parent_link="${parent_link}"
+            radius="${radius}"
+            height="${height}"
+            material="${material}"
+            collision_height="${collision_height}"
+            mesh="${mesh}"
+        >
+            <xacro:insert_block name="origin"/>
+            <gazebo_options>
+                <mu1 value="1"/>
+                <mu2 value="1"/>
+                <fdir1 value="0 0 1"/>
+            </gazebo_options>
+        </xacro:simple_wheel>
+
+        <transmission name="${wheel_prefix}_wheel_trans" type="SimpleTransmission">
+            <type>transmission_interface/SimpleTransmission</type>
+            <actuator name="${wheel_prefix}_wheel_motor">
+                <mechanicalReduction>${reduction}</mechanicalReduction>
+            </actuator>
+            <joint name="${wheel_prefix}_wheel_joint">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+        </transmission>
+    </xacro:macro>
+
+    <!--
+        Caster wheel cylinder
+    -->
+    <xacro:macro
+        name="caster_wheel"
+        params="
+            wheel_prefix
+            radius
+            height
+            mass
+            parent_link
+            *origin
+            material:=white
+            mesh:=''
+        "
+    >
+        <xacro:simple_wheel
+            wheel_prefix="${wheel_prefix}_caster"
+            mass="${mass}"
+            parent_link="${parent_link}"
+            radius="${radius}"
+            height="${height}"
+            material="${material}"
+            collision_height="0.01"
+            mesh="${mesh}"
+            joint_type="fixed"
+        >
+            <xacro:insert_block name="origin"/>
+            <gazebo_options>
+                <mu1 value="0"/>
+                <mu2 value="0"/>
+                <kp value="10000000.0" />
+                <kd value="1.0" />
+                <fdir1 value="0 0 1"/>
+                <minDepth value="0.005"/>
+            </gazebo_options>
+        </xacro:simple_wheel>
+    </xacro:macro>
+
+</robot>

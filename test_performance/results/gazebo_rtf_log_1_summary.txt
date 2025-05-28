@@ -1,0 +1,25 @@
+===== GAZEBO PERFORMANCE SUMMARY =====
+
+Real-Time Factor (RTF) Statistics:
+  Mean: 0.5240
+  Median: 0.4400
+  Min: 0.2900
+  Max: 2.1500
+  Std_dev: 0.2231
+  Variance: 0.0498
+
+CPU Usage Statistics:
+  Mean: 96.3223%
+  Median: 100.0000%
+  Min: 45.5000%
+  Max: 100.0000%
+  Std_dev: 7.8379%
+  Variance: 61.4325%
+
+Memory Usage Statistics:
+  Mean: 60.3755%
+  Median: 60.6000%
+  Min: 56.5000%
+  Max: 61.4000%
+  Std_dev: 0.7268%
+  Variance: 0.5283%

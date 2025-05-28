@@ -1,0 +1,7 @@
+=== FIRST VS LAST MAP COMPARISON ===
+
+First map: map_cleaned_map_1
+Last map: map_cleaned_map_5
+
+IoU: 0.9936
+Recall (% preserved from first to last): 99.96%

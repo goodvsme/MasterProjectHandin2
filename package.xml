@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>master_project2</name>
+  <version>0.0.0</version>
+  <description>ROS 2 package for my project</description>
+
+  <maintainer email="my_email@email.com">MY NAME</maintainer>
+  <license>TODO: License declaration</license>
+
+  <!-- Indicating that this package is part of rosidl_interface_packages -->
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <!-- Build system -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Dependencies required for running Python nodes -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>python3</exec_depend>
+
+  <!-- Dependencies required for custom service messages -->
+  <depend>rosidl_default_generators</depend>
+  <depend>builtin_interfaces</depend>
+  <depend>example_interfaces</depend>
+  <depend>sqlite3</depend>
+  <depend>python3-pil</depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  
+
+  <!-- Testing dependencies -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

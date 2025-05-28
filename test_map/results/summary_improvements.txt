@@ -1,0 +1,28 @@
+=== MAP IMPROVEMENT SUMMARY (RELATIVE TO MAP 0) ===
+
+Baseline (Map 0) values:
+Global IoU: 0.9959 (99.59%)
+ROI IoU: 0.9881 (98.81%)
+Global Recall: 99.59%
+ROI Recall: 98.81%
+
+Maximum possible improvement from baseline:
+Global IoU: 0.41%
+ROI IoU: 1.19%
+Global Recall: 0.41%
+ROI Recall: 1.19%
+
+RELATIVE IMPROVEMENTS (Percentage of potential improvement):
+Map Name, Global IoU Improvement (%), ROI IoU Improvement (%), Global Recall Improvement (%), ROI Recall Improvement (%)
+map_0, 0.00, 0.00, 0.00, 0.00
+map_cleaned_map_1, -31.31, -12.16, 7.31, 20.64
+map_cleaned_map_2, -49.31, -3.28, 11.46, 38.60
+map_cleaned_map_3, -52.61, -2.11, 15.82, 43.53
+map_cleaned_map_4, -44.08, 3.61, 29.32, 52.58
+map_cleaned_map_5, -26.65, 15.33, 48.95, 65.77
+
+EXPLANATION:
+- Relative Improvements: How much of the potential improvement from baseline to perfect score has been achieved
+- 0% means same performance as baseline (Map 0)
+- 100% means perfect score achieved (IoU=1.0 or Recall=100%)
+- Negative values indicate degradation compared to baseline

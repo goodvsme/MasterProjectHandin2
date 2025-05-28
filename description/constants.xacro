@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+	<!-- Constants -->
+	<xacro:property name="PI" value="3.1415926535897931"/>
+	<xacro:property name="DEG_TO_RAD" value="${PI/180}"/>
+</robot>

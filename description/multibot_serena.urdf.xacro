@@ -1,0 +1,331 @@
+<?xml version="1.0"?>
+<robot name="Serena" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="sensors.xacro" />
+  <xacro:include filename="wheels.xacro" />
+  <xacro:include filename="colors.xacro" />
+  <xacro:include filename="arguments.xacro" />
+
+  <xacro:property name="camera_resolution_width" value="640" />
+  <xacro:property name="camera_resolution_height" value="480" />
+
+  <xacro:property name="base_height" value="0.03" />
+
+  <xacro:property name="wheel_radius" value="0.1" />
+  <xacro:property name="wheel_length" value="0.05" />
+  <xacro:property name="caster_wheel_radius" value="0.03" />
+  <xacro:property name="caster_wheel_length" value="0.05" />
+  <xacro:property name="wheel_separation" value="0.255" />
+  <xacro:property name="wheel_height_above_base" value="${wheel_radius - base_height}" />
+  
+  <!-- Robot namespace property that will be populated by xacro -->
+  <xacro:arg name="robot_namespace" default="" />
+  <xacro:property name="robot_ns" value="$(arg robot_namespace)" />
+
+  <link name="base_footprint" />
+
+  <joint name="base_link" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <link name="base_link" />
+  
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="chassis" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <link name="chassis" type="fixed">
+    <inertial>
+      <origin xyz="0.1 0 0.10" rpy="0 0 0" />
+      <mass value="30" />
+      <inertia ixx="0.89" ixy="20.04" ixz="0.13" iyy="0.78" iyz="-0.04" izz="1.02" />
+    </inertial>
+
+    <visual>
+      <origin xyz="0.05 0 0.15" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5 0.4 0.3"/>
+      </geometry>
+      <material name="green" />
+    </visual>
+  </link>
+
+  <gazebo reference="chassis">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+  <!-- Wheels -->
+  <xacro:actuated_wheel
+    wheel_prefix="right"
+    mass="0.5"
+    parent_link="chassis"
+    radius="${wheel_radius}"
+    height="${wheel_length}"
+  >
+    <origin xyz="0 -${wheel_separation} ${wheel_height_above_base}" rpy="-${90*DEG_TO_RAD} 0 0" />
+  </xacro:actuated_wheel>
+  <xacro:actuated_wheel
+    wheel_prefix="left"
+    mass="0.5"
+    parent_link="chassis"
+    radius="${wheel_radius}"
+    height="${wheel_length}"
+  >
+    <origin xyz="0 ${wheel_separation} ${wheel_height_above_base}" rpy="-${90*DEG_TO_RAD} 0 0" />
+  </xacro:actuated_wheel>
+  <xacro:caster_wheel
+    wheel_prefix="right"
+    mass="0.06"
+    parent_link="chassis"
+    radius="${caster_wheel_radius}"
+    height="${caster_wheel_length}"
+    material="black"
+  >
+    <origin xyz="0.22551 -0.13653 -0.006322" rpy="1.5708 0.034907 0.29259" />
+  </xacro:caster_wheel>
+  <xacro:caster_wheel
+    wheel_prefix="left"
+    mass="0.06"
+    parent_link="chassis"
+    radius="${caster_wheel_radius}"
+    height="${caster_wheel_length}"
+    material="black"
+  >
+    <origin xyz="0.22551 0.13653 -0.006322" rpy="1.5708 0.034907 0.29259" />
+  </xacro:caster_wheel>
+
+  <link name="actuator_magnet_link">
+    <inertial>
+      <origin xyz="-0 0 0" rpy="0 0 0" />
+      <mass value="0.887893590942272" />
+      <inertia ixx="0.00271426770923714" ixy="5.40703247508002E-19" ixz="2.41832420741438E-13" iyy="0.00271494625570355" iyz="5.57398608182026E-20" izz="0.00523534304977873" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="orange">
+      </material>
+    </visual>
+  </link>
+  <joint name="actuator_magnet_joint" type="fixed">
+    <origin xyz="0.03 0 0.25" rpy="0 0 0" />
+    <parent link="chassis" />
+    <child link="actuator_magnet_link" />
+    <axis xyz="0 0 1" />
+    <limit effort="100" velocity="0.3" lower="-0.01" upper="0.018" />
+  </joint>
+
+  <!-- Fixed camera configuration -->
+  <xacro:intel_d435 namespace="camera" name="left_camera" parent_link="chassis" resolution_width="${camera_resolution_width}" resolution_height="${camera_resolution_height}" >
+    <origin
+      rpy="$(arg left_camera_rpy)"
+      xyz="$(arg left_camera_xyz)"
+    />
+  </xacro:intel_d435>
+  <xacro:intel_d435 namespace="camera" name="right_camera" parent_link="chassis" resolution_width="${camera_resolution_width}" resolution_height="${camera_resolution_height}" >
+    <origin
+      rpy="$(arg right_camera_rpy)"
+      xyz="$(arg right_camera_xyz)"
+    />
+  </xacro:intel_d435>
+
+  <gazebo reference="actuator_magnet_link">
+    <material>Gazebo/Gold</material>
+  </gazebo>
+
+  <gazebo reference="left_wheel_link">
+    <material>Gazebo/Gold</material>
+  </gazebo>
+
+  <gazebo reference="right_wheel_link">
+    <material>Gazebo/Gold</material>
+  </gazebo>
+
+  <gazebo reference="left_caster_wheel_link">
+    <material>Gazebo/Gold</material>
+  </gazebo>
+
+  <gazebo reference="right_caster_wheel_link">
+    <material>Gazebo/Gold</material>
+  </gazebo>
+
+  <link name="laser">
+    <inertial>
+      <origin xyz="-0.00372645003427308 -0.000389631621171302 -0.0177088543820487" rpy="0 0 0" />
+      <mass value="0.634714095589413" />
+      <inertia ixx="0.000741390303954208" ixy="-1.18839891558665E-06" ixz="1.59760809314266E-06" iyy="0.000711522529471015" iyz="1.0522295550839E-06" izz="0.000838683288282465" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 0.05"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+  <joint name="scan_joint" type="fixed">
+    <origin xyz="0.3059 0 0.1287" rpy="3.1415 0 0" />
+    <parent link="chassis" />
+    <child link="laser" />
+    <axis xyz="0 0 0" />
+  </joint>
+
+  <gazebo reference="laser">
+    <material>Gazebo/FlatBlack</material>
+
+    <!-- Use unique name for sensor and plugin -->
+    <sensor type="ray" name="${robot_ns}_laser_sensor">
+      <visualize>false</visualize>  <!-- Set to false to improve performance -->
+      <pose>0 0 0 0 0 0</pose>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>      <!-- Reduced from 720 for performance -->
+            <resolution>0.5</resolution>
+            <min_angle>-2.0</min_angle>
+            <max_angle>2.0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.1</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <update_rate>10</update_rate>    <!-- Reduced from 15 to prevent message queue overflow -->
+      <noise>
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>0.01</stddev>
+      </noise>
+
+      <!-- Updated plugin with correct ROS1-style remapping syntax -->
+      <plugin name="${robot_ns}_laser_plugin" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>${robot_ns}</namespace>
+          <argument>~/out:=scan</argument>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>${robot_ns}/laser</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- IMU -->
+  <joint name="imu_joint" type="fixed">
+    <origin xyz="0.2534 0.0 0.1975" rpy="0 0 0" />
+    <parent link="chassis" />
+    <child link="imu_link" />
+  </joint>
+
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.564" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.003881243" ixy="0.0" ixz="0.0" iyy="0.000498940" iyz="0.0" izz="0.003879257" />
+    </inertial>
+  </link>
+
+  <link name="shell">
+    <inertial>
+      <origin xyz="0.04 0.0 0.07" rpy="0 0 0" />
+      <mass value="2.0" />
+      <inertia ixx="0.14" ixy="0.0" ixz="0.01" iyy="0.12" iyz="0.0" izz="0.20" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+  </link>
+  <joint name="shell_joint" type="fixed">
+    <origin xyz="0 0 0.085" rpy="1.5708 0 1.5708" />
+    <parent link="chassis" />
+    <child link="shell" />
+    <axis xyz="0 0 0" />
+  </joint>
+
+  <gazebo reference="shell">
+    <material>Gazebo/GreyTransparent</material>
+  </gazebo>
+
+  <transmission name="lifting_mechanism">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="actuator_magnet_joint">
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="foo_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+
+  <gazebo>
+    <!-- Joint state publisher with properly named plugin -->
+    <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+      <ros>
+        <namespace>${robot_ns}</namespace>
+      </ros>
+      <update_rate>15</update_rate>
+      <joint_name>right_wheel_joint</joint_name>
+      <joint_name>left_wheel_joint</joint_name>
+    </plugin>
+
+    <!-- Differential drive controller -->
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>${robot_ns}</namespace>
+      </ros>
+      
+      <!-- Standard configuration -->
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>${2*wheel_separation}</wheel_separation>
+      <wheel_diameter>${2*wheel_radius}</wheel_diameter>
+      
+      <!-- Using robot namespace in frame IDs -->
+      <odometry_frame>${robot_ns}/odom</odometry_frame>
+      <robot_base_frame>${robot_ns}/base_footprint</robot_base_frame>
+
+      <!-- Updated parameters for better performance -->
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>10</wheelTorque>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
+      <publishWheelJointState>true</publishWheelJointState>
+      <max_wheel_torque>10</max_wheel_torque>
+      <max_acceleration>3.0</max_acceleration>
+      
+      <!-- Use world as odometry source for better accuracy -->
+      <odometry_source>1</odometry_source>
+      <cmd_vel_timeout>0.5</cmd_vel_timeout>
+    </plugin>
+
+    <!-- Keep the old ROS1-style camera plugin remapping format -->
+    <plugin name="${robot_ns}_camera_plugin" filename="libgazebo_ros_camera.so">
+      <ros>
+        <namespace>${robot_ns}</namespace>
+        <argument>left_camera/image_raw:=left_camera/color/image_raw</argument>
+        <argument>left_camera/camera_info:=left_camera/color/camera_info</argument>
+        <argument>left_camera/image_depth:=left_camera/depth/image_raw</argument>
+        <argument>left_camera/camera_info_depth:=left_camera/depth/camera_info</argument>
+        <argument>left_camera/points:=left_camera/depth/color/points</argument>
+        <argument>right_camera/image_raw:=right_camera/color/image_raw</argument>
+        <argument>right_camera/camera_info:=right_camera/color/camera_info</argument>
+        <argument>right_camera/image_depth:=right_camera/depth/image_raw</argument>
+        <argument>right_camera/camera_info_depth:=right_camera/depth/camera_info</argument>
+        <argument>right_camera/points:=right_camera/depth/color/points</argument>
+      </ros>
+      <update_rate>10.0</update_rate>
+    </plugin>
+  </gazebo>
+</robot>

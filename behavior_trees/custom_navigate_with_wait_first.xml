@@ -1,0 +1,30 @@
+<root main_tree_to_execute="NavigateWithRecovery">
+  <BehaviorTree ID="NavigateWithRecovery">
+    <RecoveryNode number_of_retries="6" name="navigate_w_recovery">
+      <PipelineSequence name="navigation_pipeline">
+        <RateController hz="1.0">
+          <RecoveryNode number_of_retries="1" name="compute_path_with_recovery">
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+            <ClearEntireCostmap name="clear_costmap_global" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </RecoveryNode>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="follow_path_with_recovery">
+          <FollowPath path="{path}" controller_id="FollowPath"/>
+          <ClearEntireCostmap name="clear_costmap_local" service_name="local_costmap/clear_entirely_local_costmap"/>
+        </RecoveryNode>
+      </PipelineSequence>
+      <!-- Custom recovery subtree that prioritizes wait -->
+      <RoundRobin name="recovery_actions">
+        <!-- First try wait -->
+        <Wait wait_duration="5.0" name="wait_recovery"/>
+        <!-- Then try other behaviors if wait doesn't resolve the issue -->
+        <Sequence name="other_recovery_actions">
+          <ClearEntireCostmap name="clear_costmap_recovery_global" service_name="global_costmap/clear_entirely_global_costmap"/>
+          <ClearEntireCostmap name="clear_costmap_recovery_local" service_name="local_costmap/clear_entirely_local_costmap"/>
+          <Spin spin_dist="1.57" name="spin_recovery"/>
+          <BackUp backup_dist="0.3" backup_speed="0.1" name="backup_recovery"/>
+        </Sequence>
+      </RoundRobin>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>
