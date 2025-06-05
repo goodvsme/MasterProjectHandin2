@@ -93,6 +93,8 @@ sudo apt install \
     python3-sqlite3 \
     python3-opencv \
     python3-pil
+#Download intelRealSense
+https://github.com/IntelRealSense/realsense-ros
 ```
 
 ### 2. YOLO Model Setup
